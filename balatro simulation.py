@@ -81,7 +81,9 @@ def findHands(deck, hand):
                 hands.append(("pair", handDF[handDF['RankID'] == handDF['RankID'].value_counts().idxmin()].index))
             else:
                 hands.append(("3 of a kind", handDF[handDF['RankID'] == handDF['RankID'].value_counts().idxmax()].index))
-                hands.append(("3 of a kind", handDF[handDF['RankID'] == handDF['RankID'].value_counts().idxmax()].index[:2]))
+                hands.append(("pair", handDF[handDF['RankID'] == handDF['RankID'].value_counts().idxmax()].index[:2]))
+                hands.append(("pair", handDF[handDF['RankID'] == handDF['RankID'].value_counts().idxmax()].index[2:]))
+                hands.append(("pair", handDF[handDF['RankID'] == handDF['RankID'].value_counts().idxmax()].index[1:-1]))
         if isStraight and not isFlush:
             hands.append(("Straight", handDF.index))
         if handDF['RankID'].value_counts().max() == 2:
@@ -89,10 +91,8 @@ def findHands(deck, hand):
                 hands.append(("Two Pair", handDF.index))
             else:
                 hands.append(("Pair", handDF[handDF['RankID'] == handDF['RankID'].value_counts().idxmax()].index))
-    """
-    for x in handDF.index:
-        hands.append(("High Card",x))
-    """
+        for x in handDF.index:
+            hands.append(("High Card",[x]))
         
 
     return hands

@@ -89,7 +89,9 @@ def findHands(deck, hand):
             hands.append(("Straight", handDF.index))
         if handDF['RankID'].value_counts().max() == 2:
             if handDF['RankID'].value_counts().tolist().count(2) == 2:
-                hands.append(("Two Pair", handDF.index))
+                counts = handDF['RankID'].value_counts()
+                twos = counts[counts == 2].index
+                hands.append(("Two Pair", handDF[handDF['RankID'].isin(twos)].index))
             else:
                 hands.append(("Pair", handDF[handDF['RankID'] == handDF['RankID'].value_counts().idxmax()].index))
         for x in handDF.index:
@@ -184,10 +186,11 @@ def printHandByGroup (hand):
 deckDF = createDeck()
 # hand = deckDF.sample(8, replace=False)
 
-hand1 = deckDF[deckDF['RankID'] == 4]
-hand2 = deckDF[deckDF['RankID'] != 4].sample(4,replace=False)
+hand1 = deckDF[deckDF['RankID'] == 2].sample(2,replace=False)
+hand2 = deckDF[deckDF['RankID'] == 3].sample(3,replace=False)
+hand3 = deckDF[(deckDF['RankID'] != 3) & (deckDF['RankID'] != 2)].sample(3,replace=False)
 
-hand = pd.concat([hand1,hand2])
+hand = pd.concat([hand1,hand2,hand3])
 
 possibleHands = findHands(deckDF,hand)
 

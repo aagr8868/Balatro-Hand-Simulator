@@ -54,6 +54,7 @@ def findHands(deck, hand):
     """
     Return a list of tuples of what cards are played and what the name of the hand is
     """
+    assert len(hand) == 8
     hands = []
 
     for h in list(it.combinations(hand.index, 5)):
@@ -183,8 +184,8 @@ def printHandByGroup (hand):
 deckDF = createDeck()
 # hand = deckDF.sample(8, replace=False)
 
-hand1 = deckDF[deckDF['RankID'] == 3].iloc[:3]
-hand2 =deckDF[deckDF['RankID'] == 4]
+hand1 = deckDF[deckDF['RankID'] == 4]
+hand2 = deckDF[deckDF['RankID'] != 4].sample(4,replace=False)
 
 hand = pd.concat([hand1,hand2])
 

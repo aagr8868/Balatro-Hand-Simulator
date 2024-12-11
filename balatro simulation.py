@@ -158,22 +158,40 @@ def convertHandsToDF(possibleHands):
 
     return scoringDF.drop_duplicates()
 
+def printHandByGroup (hand):
+    print("High Card")
+    print(scoringDF[scoringDF['Name'] == 'High Card'])
+    print("Pair")
+    print(scoringDF[scoringDF['Name'] == 'Pair'])
+    print("Two Pair")
+    print(scoringDF[scoringDF['Name'] == 'Two Pair'])
+    print("3 of a kind")
+    print(scoringDF[scoringDF['Name'] == '3 of a kind'])
+    print("Straight")
+    print(scoringDF[scoringDF['Name'] == 'Straight'])
+    print("Flush")
+    print(scoringDF[scoringDF['Name'] == 'Flush'])
+    print("Full House")
+    print(scoringDF[scoringDF['Name'] == 'Full House'])
+    print("4 of a kind")
+    print(scoringDF[scoringDF['Name'] == '4 of a kind'])
+    print("Straight Flush")
+    print(scoringDF[scoringDF['Name'] == 'Straight Flush'])
+    print("Royal Flush")
+    print(scoringDF[scoringDF['Name'] == 'Royal Flush'])
+
 deckDF = createDeck()
-hand = deckDF.sample(8, replace=False)
+# hand = deckDF.sample(8, replace=False)
+
+hand1 = deckDF[deckDF['RankID'] == 3].iloc[:3]
+hand2 =deckDF[deckDF['RankID'] == 4]
+
+hand = pd.concat([hand1,hand2])
+
 possibleHands = findHands(deckDF,hand)
 
 scoringDF = convertHandsToDF(possibleHands)
 print(hand)
-print(scoringDF)
-"""
-print(scoringDF[scoringDF['Name'] == 'High Card'])
-print(scoringDF[scoringDF['Name'] == 'Pair'])
-print(scoringDF[scoringDF['Name'] == 'Two Pair'])
-print(scoringDF[scoringDF['Name'] == '3 of a kind'])
-print(scoringDF[scoringDF['Name'] == 'Straight'])
-print(scoringDF[scoringDF['Name'] == 'Flush'])
-print(scoringDF[scoringDF['Name'] == 'Full House'])
-print(scoringDF[scoringDF['Name'] == '4 of a kind'])
-print(scoringDF[scoringDF['Name'] == 'Straight Flush'])
-print(scoringDF[scoringDF['Name'] == 'Royal Flush'])
-"""
+# print(scoringDF)
+
+printHandByGroup(scoringDF)

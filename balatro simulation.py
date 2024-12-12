@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 import itertools as it
 
-def createDeck():
+def createDeck(uniqueReturn = None):
+    if (uniqueReturn != None): assert len(uniqueReturn) == 8
     """
     Create a new deck
     Output: 52 card pandas dataframe
@@ -47,8 +48,10 @@ def createDeck():
 
     df['Scores'] = scores
     df['RankID'] = rank_id
-    
-    return df
+    if (uniqueReturn == None):
+        return df
+    else:
+        return df.iloc[uniqueReturn]
 
 def findHands(deck, hand):
     """
@@ -163,48 +166,68 @@ def convertHandsToDF(possibleHands):
 
 def printHandByGroup (hand):
     print("High Card")
-    print(scoringDF[scoringDF['Name'] == 'High Card'])
+    print(hand[hand['Name'] == 'High Card'])
     print("")
     print("Pair")
-    print(scoringDF[scoringDF['Name'] == 'Pair'])
+    print(hand[hand['Name'] == 'Pair'])
     print("")
     print("Two Pair")
-    print(scoringDF[scoringDF['Name'] == 'Two Pair'])
+    print(hand[hand['Name'] == 'Two Pair'])
     print("")
     print("3 of a kind")
-    print(scoringDF[scoringDF['Name'] == '3 of a kind'])
+    print(hand[hand['Name'] == '3 of a kind'])
     print("")
     print("Straight")
-    print(scoringDF[scoringDF['Name'] == 'Straight'])
+    print(hand[hand['Name'] == 'Straight'])
     print("")
     print("Flush")
-    print(scoringDF[scoringDF['Name'] == 'Flush'])
+    print(hand[hand['Name'] == 'Flush'])
     print("")
     print("Full House")
-    print(scoringDF[scoringDF['Name'] == 'Full House'])
+    print(hand[hand['Name'] == 'Full House'])
     print("")
     print("4 of a kind")
-    print(scoringDF[scoringDF['Name'] == '4 of a kind'])
+    print(hand[hand['Name'] == '4 of a kind'])
     print("")
     print("Straight Flush")
-    print(scoringDF[scoringDF['Name'] == 'Straight Flush'])
+    print(hand[hand['Name'] == 'Straight Flush'])
     print("")
     print("Royal Flush")
-    print(scoringDF[scoringDF['Name'] == 'Royal Flush'])
+    print(hand[hand['Name'] == 'Royal Flush'])
+
+def getOneScoringDF(deck):
+    hand = deck.sample(8, replace=False)
+    possibleHands = findHands(deck,hand)
+    scoringDF = convertHandsToDF(possibleHands)
+    scoringDF['BaseScore'] = [getBaseScore(x) for x in scoringDF['Name']]
+    card1Score = np.array(scoringDF['Card1'])
+    card2Score = np.array(scoringDF['Card2'])
+    card3Score = np.array(scoringDF['Card3'])
+    card4Score = np.array(scoringDF['Card4'])
+    card5Score = np.array(scoringDF['Card5'])
+    for i in range(len(card1Score)):
+        if card1Score[i] == -1: card1Score[i] = 0
+        else: card1Score[i] = deckDF.iloc[card1Score[i]]['Scores']
+    for i in range(len(card2Score)):
+        if card2Score[i] == -1: card2Score[i] = 0
+        else: card2Score[i] = deckDF.iloc[card2Score[i]]['Scores']
+    for i in range(len(card3Score)):
+        if card3Score[i] == -1: card3Score[i] = 0
+        else: card3Score[i] = deckDF.iloc[card3Score[i]]['Scores']
+    for i in range(len(card4Score)):
+        if card4Score[i] == -1: card4Score[i] = 0
+        else: card4Score[i] = deckDF.iloc[card4Score[i]]['Scores']
+    for i in range(len(card5Score)):
+        if card5Score[i] == -1: card5Score[i] = 0
+        else: card5Score[i] = deckDF.iloc[card5Score[i]]['Scores']
+    cardScores = card1Score + card2Score + card3Score + card4Score + card5Score
+    baseScore = np.array([x[0] for x in scoringDF['BaseScore']])
+    baseMult = np.array([x[1] for x in scoringDF['BaseScore']])
+    scoringDF['Score'] = (cardScores + baseScore) * baseMult
+    return scoringDF
+
 
 deckDF = createDeck()
-# hand = deckDF.sample(8, replace=False)
-
-hand1 = deckDF[deckDF['RankID'] == 2].sample(2,replace=False)
-hand2 = deckDF[deckDF['RankID'] == 3].sample(3,replace=False)
-hand3 = deckDF[(deckDF['RankID'] != 3) & (deckDF['RankID'] != 2)].sample(3,replace=False)
-
-hand = pd.concat([hand1,hand2,hand3])
-
-possibleHands = findHands(deckDF,hand)
-
-scoringDF = convertHandsToDF(possibleHands)
-print(hand)
-# print(scoringDF)
-
-printHandByGroup(scoringDF)
+print(deckDF)
+once = getOneScoringDF(deckDF)
+print(once)

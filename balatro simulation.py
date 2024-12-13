@@ -207,27 +207,43 @@ def getOneScoringDF(deck):
     card5Score = np.array(scoringDF['Card5'])
     for i in range(len(card1Score)):
         if card1Score[i] == -1: card1Score[i] = 0
-        else: card1Score[i] = deckDF.iloc[card1Score[i]]['Scores']
+        else: card1Score[i] = deck.iloc[card1Score[i]]['Scores']
     for i in range(len(card2Score)):
         if card2Score[i] == -1: card2Score[i] = 0
-        else: card2Score[i] = deckDF.iloc[card2Score[i]]['Scores']
+        else: card2Score[i] = deck.iloc[card2Score[i]]['Scores']
     for i in range(len(card3Score)):
         if card3Score[i] == -1: card3Score[i] = 0
-        else: card3Score[i] = deckDF.iloc[card3Score[i]]['Scores']
+        else: card3Score[i] = deck.iloc[card3Score[i]]['Scores']
     for i in range(len(card4Score)):
         if card4Score[i] == -1: card4Score[i] = 0
-        else: card4Score[i] = deckDF.iloc[card4Score[i]]['Scores']
+        else: card4Score[i] = deck.iloc[card4Score[i]]['Scores']
     for i in range(len(card5Score)):
         if card5Score[i] == -1: card5Score[i] = 0
-        else: card5Score[i] = deckDF.iloc[card5Score[i]]['Scores']
+        else: card5Score[i] = deck.iloc[card5Score[i]]['Scores']
     cardScores = card1Score + card2Score + card3Score + card4Score + card5Score
     baseScore = np.array([x[0] for x in scoringDF['BaseScore']])
     baseMult = np.array([x[1] for x in scoringDF['BaseScore']])
     scoringDF['Score'] = (cardScores + baseScore) * baseMult
     return scoringDF
 
+def getSampleMean(sampleSize, simCount, simMax):
+    deckDF = createDeck()
+    sample = np.array([])
+    for samp in range(sampleSize):
+        message = "sumulation: " + str(simCount + 1) + "/" + str(simMax) + " sample: " + str(samp + 1) + "/" + str(sampleSize)
+        space = " " * len(message)
+        print(message + space, end = "\r")
+        sample = np.append(sample, getOneScoringDF(deckDF)['Score'].max())
+    return np.mean(sample)
 
-deckDF = createDeck()
-print(deckDF)
-once = getOneScoringDF(deckDF)
-print(once)
+def simulate(numSimulations, sampleSize):
+    sampleMean = np.array([])
+    for sim in range (numSimulations):
+        sampleMean = np.append(sampleMean,getSampleMean(sampleSize,sim,numSimulations))
+    return sampleMean
+
+means = simulate(1000,100)
+min = np.percentile(means,(100-95)/2)
+max = np.percentile(means,(100-95)/2 + 95)
+
+print(f"95% confidence interval: [{min:.2f}, {max:.2f}]")

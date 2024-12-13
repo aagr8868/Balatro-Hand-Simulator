@@ -230,7 +230,7 @@ def getSampleMean(sampleSize, simCount, simMax):
     deckDF = createDeck()
     sample = np.array([])
     for samp in range(sampleSize):
-        message = "sumulation: " + str(simCount + 1) + "/" + str(simMax) + " sample: " + str(samp + 1) + "/" + str(sampleSize)
+        message = "simulation: " + str(simCount + 1) + "/" + str(simMax) + " sample: " + str(samp + 1) + "/" + str(sampleSize)
         space = " " * len(message)
         print(message + space, end = "\r")
         sample = np.append(sample, getOneScoringDF(deckDF)['Score'].max())

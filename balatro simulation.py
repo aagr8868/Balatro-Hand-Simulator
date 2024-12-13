@@ -1,6 +1,20 @@
 import numpy as np
 import pandas as pd
 import itertools as it
+from matplotlib import pyplot as plt
+
+HAND_NAMES = [
+    'High Card',
+    'Pair',
+    'Two Pair',
+    '3 of a kind',
+    'Straight',
+    'Flush',
+    'Full House',
+    '4 of a kind',
+    'Straight Flush',
+    'Royal Flush'
+]
 
 def createDeck(uniqueReturn = None):
     if (uniqueReturn != None): assert len(uniqueReturn) == 8
@@ -226,24 +240,67 @@ def getOneScoringDF(deck):
     scoringDF['Score'] = (cardScores + baseScore) * baseMult
     return scoringDF
 
-def getSampleMean(sampleSize, simCount, simMax):
+def generateOneSample(sampleSize, simCount, simMax):
     deckDF = createDeck()
-    sample = np.array([])
+    average = 0
+    handProb = np.zeros(len(HAND_NAMES))
+
     for samp in range(sampleSize):
-        message = "simulation: " + str(simCount + 1) + "/" + str(simMax) + " sample: " + str(samp + 1) + "/" + str(sampleSize)
+        message = "Simulation: " + str(simCount + 1) + "/" + str(simMax) + " sample: " + str(samp + 1) + "/" + str(sampleSize)
         space = " " * len(message)
         print(message + space, end = "\r")
-        sample = np.append(sample, getOneScoringDF(deckDF)['Score'].max())
-    return np.mean(sample)
 
-def simulate(numSimulations, sampleSize):
-    sampleMean = np.array([])
+        sample = getOneScoringDF(deckDF)
+        average += sample['Score'].max()
+        handProb += np.array([len(sample[sample['Name'] == handName]) > 0 for handName in HAND_NAMES])
+    
+    average /= sampleSize
+    handProb /= sampleSize
+
+    print(" " * len(message), end="\r")
+
+    return np.append(handProb,average)
+
+def generateMultipleSamples(numSimulations, sampleSize):
+    sampleMeans = []
+    sampleProbs = []
     for sim in range (numSimulations):
-        sampleMean = np.append(sampleMean,getSampleMean(sampleSize,sim,numSimulations))
-    return sampleMean
+        sample = generateOneSample(sampleSize,sim,numSimulations)
+        sampleMeans.append(sample[-1])
+        sampleProbs.append(sample[:-1])
+    
+    sampleMeans = np.array(sampleMeans)
+    sampleProbs = np.array(sampleProbs) * 100
 
-means = simulate(1000,100)
-min = np.percentile(means,(100-95)/2)
-max = np.percentile(means,(100-95)/2 + 95)
+    df = pd.DataFrame({'Mean': sampleMeans})
 
-print(f"95% confidence interval: [{min:.2f}, {max:.2f}]")
+    for i, handname in enumerate(HAND_NAMES):
+        df[f"p_{handname}"] = sampleProbs[:,i]
+
+    return df
+
+def confInt(list,percent):
+    min = np.percentile(list,(100-percent)/2)
+    max = np.percentile(list,(100-percent)/2 + percent)
+    return (min,max)
+
+NUM_SIMS = 2
+SAMPLE_SIZE = 10
+CI = 95
+
+samples = generateMultipleSamples(NUM_SIMS,SAMPLE_SIZE)
+means = samples['Mean']
+probs = [samples['p_'+handName] for handName in HAND_NAMES]
+
+for i in range(len(probs)):
+    probs[i] = list(probs[i])
+
+meanRange = confInt(means,CI)
+probsRange = []
+for p in probs:
+    probsRange.append(confInt(p,CI))
+
+print(f"With a sample size of {SAMPLE_SIZE} which was ran {NUM_SIMS} times each, we can determine:")
+print(f"With a {CI}% confidence interval, the average score is between {meanRange[0]} and {meanRange[1]}")
+for i, name in enumerate(HAND_NAMES):
+    print(f"With a {CI}% confidence interval, the average percent chance of getting a {HAND_NAMES[i]} is between {probsRange[i][0]} and {probsRange[i][1]}")
